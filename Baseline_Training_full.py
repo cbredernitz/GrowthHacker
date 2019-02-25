@@ -56,6 +56,8 @@ df_train = flatten_hits(df_small)
 df_test = load_df('D:\\Documents\\ga-customer-revenue-prediction\\test_v2.csv')
 df_test = flatten_hits(df_test)
 
+for each in df_train.columns:
+    print(each)
 cols_to_remove = [x for x in ones if set(df_small[x].unique()) == set(['not available in demo dataset'])]
 
 y = df_small['totals.totalTransactionRevenue'].fillna(0).astype(float)
