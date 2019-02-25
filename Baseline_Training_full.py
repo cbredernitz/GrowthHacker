@@ -12,8 +12,8 @@ from math import sqrt
 def load_df(csv_path, nrows=None):
     JSON_COLUMNS = ['device', 'geoNetwork', 'totals', 'trafficSource']
 
-    df = pd.read_csv(csv_path, 
-                     converters={column: json.loads for column in JSON_COLUMNS}, 
+    df = pd.read_csv(csv_path,
+                     converters={column: json.loads for column in JSON_COLUMNS},
                      dtype={'fullVisitorId': 'str'}, # Important!!
                      nrows=nrows)
 
@@ -49,27 +49,48 @@ def flatten_hits(df):
     return df
 
 ### Loading TRAIN Data
-df_train = load_df("train_v2.csv", nrows=1000)
+df_train = load_df("train_v2.csv")
 df_train = flatten_hits(df_train)
 
 ### Loading TEST Data
-df_test = load_df('test_v2.csv', nrows=1000)
+df_test = load_df('test_v2.csv')
 df_test = flatten_hits(df_test)
 
 ### unique valued columns
 ones = []
-
 for each in df_train.columns:
-    if df_train[each].nunique() == 1:
-        ones.append(each)
+    try:
+        if df_train[each].nunique() == 1:
+            ones.append(each)
+    except:
+        print(each)
 cols_to_remove = [x for x in ones if set(df_train[x].unique()) == set(['not available in demo dataset'])]
+cols_to_remove.append('hits')
+cols_to_remove.append('customDimensions_x')
+cols_to_remove.append('customDimensions_y')
+
+cols_to_remove.append('customVariables')
+cols_to_remove.append('customMetrics')
+cols_to_remove.append('experiment')
+cols_to_remove.append('promoId')
+cols_to_remove.append('promoName')
+cols_to_remove.append('promotionActionInfo.promoIsView')
+cols_to_remove.append('publisher_infos')
+cols_to_remove.append('v2ProductCategory')
+cols_to_remove.append('v2ProductName')
+
+# average = df_train['totals.totalTransactionRevenue'].dropna().mean()
 
 y = df_train['totals.totalTransactionRevenue'].fillna(0).astype(float)
 y = y.apply(lambda x: np.log1p(x))
 df_train = df_train.drop('totals.totalTransactionRevenue', axis=1)
 
 ### Removing columns that contain no data
-df_train = df_train.drop(list(cols_to_remove), axis=1)
+cols_to_remove_train = list(cols_to_remove)
+cols_to_remove_train.append('page.searchCategory')
+cols_to_remove_train.append('page.searchKeyword')
+cols_to_remove_train.append('totals.bounces')
+df_train = df_train.drop(list(cols_to_remove_train), axis=1)
 df_test = df_test.drop(list(cols_to_remove), axis=1)
 
 cat_columns = ['channelGrouping',
@@ -80,21 +101,59 @@ cat_columns = ['channelGrouping',
                'geoNetwork.city',
                'geoNetwork.continent',
                'geoNetwork.country',
-               'geoNetwork.metro', 
+               'geoNetwork.metro',
                'geoNetwork.networkDomain',
-               'geoNetwork.region', 
+               'geoNetwork.region',
                'geoNetwork.subContinent',
                'trafficSource.adContent',
                'trafficSource.adwordsClickInfo.adNetworkType',
                'trafficSource.adwordsClickInfo.gclId',
                'trafficSource.adwordsClickInfo.page',
-               'trafficSource.adwordsClickInfo.slot', 
+               'trafficSource.adwordsClickInfo.slot',
                'trafficSource.campaign',
                'trafficSource.keyword',
                'trafficSource.referralPath',
                'trafficSource.source',
-               'trafficSource.medium'
+               'trafficSource.medium',
+               'appInfo.exitScreenName',
+               'appInfo.landingScreenName',
+               'appInfo.screenName',
+               'contentGroup.contentGroup1',
+               'contentGroup.contentGroup2',
+               'contentGroup.contentGroup3',
+               'contentGroup.contentGroup4',
+               'contentGroup.contentGroup5',
+               'contentGroup.previousContentGroup1',
+               'contentGroup.previousContentGroup2',
+               'contentGroup.previousContentGroup3',
+               'contentGroup.previousContentGroup4',
+               'contentGroup.previousContentGroup5',
+               'dataSource',
+               'item.currencyCode',
+               'item.transactionId',
+               'transaction.currencyCode',
+               'page.hostname',
+               'page.pagePath',
+               'page.pagePathLevel1',
+               'page.pagePathLevel2',
+               'page.pagePathLevel3',
+               'page.pagePathLevel4',
+               'page.pageTitle',
+#                'page.searchCategory',
+#                'page.searchKeyword',
+               'referer',
+               'social.socialNetwork',
+               'social.socialInteractionNetworkAction',
+               'social.hasSocialSourceReferral',
+               'type',
+               'transaction.transactionId',
+               'transaction.affiliation',
+               'eventInfo.eventLabel',
+               'eventInfo.eventCategory',
+               'eventInfo.eventAction',
+               'eCommerceAction.option'
               ]
+
 
 from sklearn import preprocessing
 for each in cat_columns:
@@ -107,26 +166,26 @@ for each in cat_columns:
 y_true = df_test['totals.totalTransactionRevenue'].fillna(0).astype(float)
 y_true = y_true.apply(lambda x: np.log1p(x))
 df_test = df_test.drop('totals.totalTransactionRevenue', axis=1)
-df_train = df_train.drop('totals.totalTransactionRevenue', axis=1)
+# df_train = df_train.drop('totals.totalTransactionRevenue', axis=1)
 
 y_mean = np.mean(y)
 y_base = np.full_like(y_true, y_mean)
 
-df_train = df_train.drop('customDimensions', axis=1)
-df_test = df_test.drop('customDimensions', axis=1)
+# df_train = df_train.drop('customDimensions', axis=1)
+# df_test = df_test.drop('customDimensions', axis=1)
 df_train = df_train.drop('totals.transactionRevenue', axis=1)
 df_test = df_test.drop('totals.transactionRevenue', axis=1)
 df_train = df_train.drop('totals.transactions', axis=1)
 df_test = df_test.drop('totals.transactions', axis=1)
 
 def preprocess(df):
-    df['totals.bounces'] = df['totals.bounces'].fillna(0).astype(np.float)
+    # df['totals.bounces'] = df['totals.bounces'].fillna(0).astype(np.float)
     df['totals.newVisits'] = df['totals.newVisits'].fillna(0).astype(np.float)
-    df['totals.transactionRevenue'] = df['totals.transactionRevenue'].fillna(0).astype(np.float)
-    df['totals.transactions'] = df['totals.transactions'].fillna(0).astype(np.float)
+    # df['totals.transactionRevenue'] = df['totals.transactionRevenue'].fillna(0).astype(np.float)
+    # df['totals.transactions'] = df['totals.transactions'].fillna(0).astype(np.float)
     df['trafficSource.adwordsClickInfo.isVideoAd'] = df['trafficSource.adwordsClickInfo.isVideoAd'].fillna(0).astype(np.float)
     df['trafficSource.isTrueDirect'] = df['trafficSource.isTrueDirect'].fillna(0).astype(np.float)
-    
+
     return df
 
 df_train = preprocess(df_train)
@@ -146,7 +205,10 @@ y_pred = clf_tree.predict(df_test)
 y_pred_train = clf_tree.predict(df_train)
 
 RMSE_test = sqrt(mean_squared_error(y_true, y_pred))
-RMSE_train = sqrt(mean_squared_error(y_true, y_pred_train))
+RMSE_train = sqrt(mean_squared_error(y, y_pred_train))
+
+print('TEST RMSE:'+str(RMSE_test))
+print('TRAIN RMSE:'+str(RMSE_train))
 
 for idx, each in enumerate(clf_tree.feature_importances_):
     print(idx, each*1e5)
