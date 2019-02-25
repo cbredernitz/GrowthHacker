@@ -7,7 +7,7 @@ import ast
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.linear_model.stochastic_gradient import SGDRegressor
 from sklearn.metrics import mean_squared_error
-
+from math import sqrt
 
 def load_df(csv_path, nrows=None):
     JSON_COLUMNS = ['device', 'geoNetwork', 'totals', 'trafficSource']
@@ -19,10 +19,10 @@ def load_df(csv_path, nrows=None):
 
     for column in JSON_COLUMNS:
         column_as_df = json_normalize(df[column])
-        column_as_df.columns = [f"{column}.{subcolumn}" for subcolumn in column_as_df.columns]
+        column_as_df.columns = ["{0}.{1}".format(column, subcolumn) for subcolumn in column_as_df.columns]
         df = df.drop(column, axis=1).merge(column_as_df, right_index=True, left_index=True)
-    print(f"Loaded {os.path.basename(csv_path)}. Shape: {df.shape}")
-    print(df.shape)
+    # print(f"Loaded {os.path.basename(csv_path)}. Shape: {df.shape}")
+    # print(df.shape)
     return df
 
 def flatten_hits(df):
@@ -49,20 +49,24 @@ def flatten_hits(df):
     return df
 
 ### Loading TRAIN Data
-df_train = load_df()
-df_train = flatten_hits(df_small)
+df_train = load_df("train_v2.csv", nrows=1000)
+df_train = flatten_hits(df_train)
 
 ### Loading TEST Data
-df_test = load_df('D:\\Documents\\ga-customer-revenue-prediction\\test_v2.csv')
+df_test = load_df('test_v2.csv', nrows=1000)
 df_test = flatten_hits(df_test)
 
-for each in df_train.columns:
-    print(each)
-cols_to_remove = [x for x in ones if set(df_small[x].unique()) == set(['not available in demo dataset'])]
+### unique valued columns
+ones = []
 
-y = df_small['totals.totalTransactionRevenue'].fillna(0).astype(float)
+for each in df_train.columns:
+    if df_train[each].nunique() == 1:
+        ones.append(each)
+cols_to_remove = [x for x in ones if set(df_train[x].unique()) == set(['not available in demo dataset'])]
+
+y = df_train['totals.totalTransactionRevenue'].fillna(0).astype(float)
 y = y.apply(lambda x: np.log1p(x))
-df_train = df_small.drop('totals.totalTransactionRevenue', axis=1)
+df_train = df_train.drop('totals.totalTransactionRevenue', axis=1)
 
 ### Removing columns that contain no data
 df_train = df_train.drop(list(cols_to_remove), axis=1)
@@ -103,6 +107,7 @@ for each in cat_columns:
 y_true = df_test['totals.totalTransactionRevenue'].fillna(0).astype(float)
 y_true = y_true.apply(lambda x: np.log1p(x))
 df_test = df_test.drop('totals.totalTransactionRevenue', axis=1)
+df_train = df_train.drop('totals.totalTransactionRevenue', axis=1)
 
 y_mean = np.mean(y)
 y_base = np.full_like(y_true, y_mean)
@@ -138,8 +143,10 @@ clf_tree = tree.DecisionTreeRegressor()
 clf_tree = clf_tree.fit(df_train, y)
 
 y_pred = clf_tree.predict(df_test)
+y_pred_train = clf_tree.predict(df_train)
 
-RMSE = sqrt(mean_squared_error(y_true, y_pred))
+RMSE_test = sqrt(mean_squared_error(y_true, y_pred))
+RMSE_train = sqrt(mean_squared_error(y_true, y_pred_train))
 
 for idx, each in enumerate(clf_tree.feature_importances_):
     print(idx, each*1e5)
@@ -149,3 +156,5 @@ print('-'*10)
 for idx, each in enumerate(df_train.columns):
     print(idx, each)
 
+print("RMSE on test: ", RMSE_test)
+print("RMSE on train: ", RMSE_train)
