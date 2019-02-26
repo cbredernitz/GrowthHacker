@@ -139,8 +139,6 @@ cat_columns = ['channelGrouping',
                'page.pagePathLevel3',
                'page.pagePathLevel4',
                'page.pageTitle',
-#                'page.searchCategory',
-#                'page.searchKeyword',
                'referer',
                'social.socialNetwork',
                'social.socialInteractionNetworkAction',
@@ -179,14 +177,49 @@ df_train = df_train.drop('totals.transactions', axis=1)
 df_test = df_test.drop('totals.transactions', axis=1)
 
 def preprocess(df):
-    # df['totals.bounces'] = df['totals.bounces'].fillna(0).astype(np.float)
     df['totals.newVisits'] = df['totals.newVisits'].fillna(0).astype(np.float)
-    # df['totals.transactionRevenue'] = df['totals.transactionRevenue'].fillna(0).astype(np.float)
-    # df['totals.transactions'] = df['totals.transactions'].fillna(0).astype(np.float)
+    df['totals.timeOnSite'] = df['totals.newVisits'].fillna(0).astype(np.float)
     df['trafficSource.adwordsClickInfo.isVideoAd'] = df['trafficSource.adwordsClickInfo.isVideoAd'].fillna(0).astype(np.float)
     df['trafficSource.isTrueDirect'] = df['trafficSource.isTrueDirect'].fillna(0).astype(np.float)
-
+    
+    # Boolean
+    df['trafficSource.adwordsClickInfo.isVideoAd'] = df['trafficSource.adwordsClickInfo.isVideoAd'].fillna(1).astype(np.float)
+    df['trafficSource.isTrueDirect'] = df['trafficSource.isTrueDirect'].fillna(0).astype(np.float)
+    df['exceptionInfo.isFatal'] = df['exceptionInfo.isFatal'].fillna(0).astype(np.float)
+    df['isEntrance'] = df['isEntrance'].fillna(0).astype(np.float)
+    df['isExit'] = df['isExit'].fillna(0).astype(np.float)
+    df['isInteraction'] = df['isInteraction'].fillna(0).astype(np.float)
+    
+    # Text numbers to int
+    df['totals.hits'] = df['totals.hits'].fillna(0).astype(np.float)
+    df['totals.pageviews'] = df['totals.pageviews'].fillna(0).astype(np.float)
+    df['totals.sessionQualityDim'] = df['totals.sessionQualityDim'].fillna(0).astype(np.float)
+    df['totals.timeOnSite'] = df['totals.timeOnSite'].fillna(0).astype(np.float)
+    df['totals.visits'] = df['totals.visits'].fillna(0).astype(np.float)
+    df['totals.timeOnSite'] = df['totals.timeOnSite'].fillna(0).astype(np.float)
+    df['trafficSource.adwordsClickInfo.page'] = df['trafficSource.adwordsClickInfo.page'].fillna(0).astype(np.float)
+    df['contentGroup.contentGroupUniqueViews1'] = df['contentGroup.contentGroupUniqueViews1'].fillna(0).astype(np.float)
+    df['contentGroup.contentGroupUniqueViews2'] = df['contentGroup.contentGroupUniqueViews2'].fillna(0).astype(np.float)
+    df['eCommerceAction.action_type'] = df['eCommerceAction.action_type'].fillna(0).astype(np.float)
+    df['eCommerceAction.step'] = df['eCommerceAction.step'].fillna(0).astype(np.float)
+    df['hitNumber'] = df['hitNumber'].fillna(0).astype(np.float)
+    df['hour'] = df['hour'].fillna(0).astype(np.float)
+    df['latencyTracking.domContentLoadedTime'] = df['latencyTracking.domContentLoadedTime'].fillna(0).astype(np.float)
+    df['latencyTracking.domInteractiveTime'] = df['latencyTracking.domInteractiveTime'].fillna(0).astype(np.float)
+    df['latencyTracking.domLatencyMetricsSample'] = df['latencyTracking.domLatencyMetricsSample'].fillna(0).astype(np.float)
+    df['latencyTracking.domainLookupTime'] = df['latencyTracking.domainLookupTime'].fillna(0).astype(np.float)
+    df['latencyTracking.pageDownloadTime'] = df['latencyTracking.pageDownloadTime'].fillna(0).astype(np.float)
+    df['latencyTracking.pageLoadTime'] = df['latencyTracking.pageLoadTime'].fillna(0).astype(np.float)
+    df['latencyTracking.redirectionTime'] = df['latencyTracking.redirectionTime'].fillna(0).astype(np.float)
+    df['latencyTracking.serverConnectionTime'] = df['latencyTracking.serverConnectionTime'].fillna(0).astype(np.float)
+    df['latencyTracking.serverResponseTime'] = df['latencyTracking.serverResponseTime'].fillna(0).astype(np.float)
+    df['minute'] = df['minute'].fillna(0).astype(np.float)
+    df['time'] = df['time'].fillna(0).astype(np.float)
+    df['latencyTracking.serverConnectionTime'] = df['latencyTracking.serverConnectionTime'].fillna(0).astype(np.float)
     return df
+
+df_train = preprocess(df_train)
+df_test = preprocess(df_test)
 
 df_train = preprocess(df_train)
 df_test = preprocess(df_test)
