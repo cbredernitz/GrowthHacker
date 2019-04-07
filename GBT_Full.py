@@ -113,8 +113,7 @@ from sklearn import ensemble
 from sklearn.model_selection import GridSearchCV
 
 ##### Can comment out the code between when running all columns #####
-
- low_features = [
+low_features = [
     'socialEngagementType',
     'totals.bounces',
     'trafficSource.adwordsClickInfo.adNetworkType',
