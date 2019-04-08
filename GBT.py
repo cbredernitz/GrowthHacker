@@ -39,8 +39,7 @@ def main():
     # colums that contain no data
     ones = unique_valued_cols(df_train)
     cols_to_remove = [x for x in ones if set(df_train[x].unique()) == set(['not available in demo dataset'])]
-    cols_to_remove.append('hits')
-    cols_to_remove.append('customDimensions')
+    cols_to_remove.append(['hits', 'customDimensions'])
 
     # Drop them
     df_train = drop_cols(df_train, list(cols_to_remove))
@@ -54,6 +53,10 @@ def main():
     # Remove extra column in training
     df_train = df_train.drop('trafficSource.campaignCode', axis=1)
 
+    ### Preprocess the data before we start training
+    df_train = preprocess(df_train)
+    df_test = preprocess(df_test)
+
     ### Create categorical and numeric features dataframe
     df_categorical = df_train.select_dtypes(include=['object'])
     df_categorical_test = df_test.select_dtypes(include=['object'])
@@ -61,10 +64,6 @@ def main():
     # Numeric
     df_numeric = df_train.select_dtypes(include=['float64', 'int64'])
     df_numeric_test = df_test.select_dtypes(include=['float64', 'int64'])
-
-    ### Preprocess the data before we start training
-    df_train = preprocess(df_train)
-    df_test = preprocess(df_test)
 
     # Label encoding
     df_categorical = label_encoding(df_categorical)

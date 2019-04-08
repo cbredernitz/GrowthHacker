@@ -9,10 +9,10 @@ from data_preprocess import unique_valued_cols
 
 def main():
     ### Loading TRAIN Data
-    df_train = load_df("train_v2.csv")
+    df_train = load_df("train_v2.csv",10000)
 
     ### Loading TEST Data
-    df_test = load_df('test_v2.csv')
+    df_test = load_df('test_v2.csv', 10000)
 
     ### Fix outliers that do not fall within +/-3 std dev from mean of log transaction value
     
@@ -38,8 +38,8 @@ def main():
     # colums that contain no data
     ones = unique_valued_cols(df_train)
     cols_to_remove = [x for x in ones if set(df_train[x].unique()) == set(['not available in demo dataset'])]
-    cols_to_remove.append('hits')
-    cols_to_remove.append('customDimensions')
+    cols_to_remove.extend(['hits','customDimensions'])
+
 
     # Drop them from both the sets
     df_train = drop_cols(df_train, list(cols_to_remove))
@@ -51,7 +51,11 @@ def main():
     df_test = drop_cols(df_test, transaction_cols)
 
     # Remove extra column in training
-    df_train = df_train.drop('trafficSource.campaignCode', axis=1)
+    #df_train = df_train.drop('trafficSource.campaignCode', axis=1)
+
+    ### Preprocess the data before we start training
+    df_train = preprocess(df_train)
+    df_test = preprocess(df_test)
 
     ### Create categorical and numeric features dataframe
     df_categorical = df_train.select_dtypes(include=['object'])
@@ -61,11 +65,7 @@ def main():
     df_numeric = df_train.select_dtypes(include=['float64', 'int64'])
     df_numeric_test = df_test.select_dtypes(include=['float64', 'int64'])
 
-    ### Preprocess the data before we start training
-    df_train = preprocess(df_train)
-    df_test = preprocess(df_test)
-
-    # Label encoding
+    # Label encoding on categorical
     df_categorical = label_encoding(df_categorical)
     df_categorical_test = label_encoding(df_categorical_test)
 
