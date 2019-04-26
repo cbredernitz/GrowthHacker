@@ -1,0 +1,28 @@
+<html>
+   <head>
+      <title>Anticipated Customer Revenue</title>
+      <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+   </head>
+   <body>
+      <header><b>Customer Profile</b></header>
+      <h1>Enter In Your Cusotmer's Antcipated Behavior:</h1>
+      <form action = "http://127.0.0.1:5000/result" method = "POST">
+         <p>visitId <input type = "text" name = "visitId" /></p>
+         <p>Visit Number <input type = "text" name = "visitNumber" /></p>
+         <p>Visit Start Time (UNIX) <input type = "text" name = "visitStartTime" /></p>
+         <p>Total Page Hits <input type ="text" name = "totals.hits" /></p>
+         <p>Total New Visits From Customer <input type = "text" name = "totals.newVisits" /></p>
+         <p>Total Page Views <input type ="text" name = "totals.pageviews" /></p>
+         <p>Session Quality Dimension <input type ="text" name = "totals.sessionQualityDim" /></p>
+         <p>Total Time Spent On Site <input type ="text" name = "totals.timeOnSite" /></p>
+         <p>Total Visits <input type ="text" name = "totals.visits" /></p>
+         <p>If User Clicked On A Video Ad (1 for YES; 0 for NO) <input type ="text" name = "trafficSource.adwordsClickInfo.isVideoAd" /></p>
+         <p>If User Was a True Direct (1 for YES; 0 for NO) <input type ="text" name = "trafficSource.isTrueDirect" /></p>
+         <p>Day Of The Week (1 For Sunday ---> 7 For Saturday) <input type ="text" name = "day_of_week" /></p>
+         <p>Hour (24 Time) <input type ="text" name = "hour" /></p>
+         <p>Day Of Month <input type ="text" name = "day" /></p>
+         <p>Month (Numeric) <input type ="text" name = "month" /></p>
+         <p><input type = "submit" value = "submit" /></p>
+      </form>
+   </body>
+</html>
